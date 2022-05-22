@@ -1,5 +1,5 @@
 import {TodoistApi} from '@doist/todoist-api-typescript';
-import type { Event } from './Event';
+import type {Event} from './Event';
 
 const todoistProjectToSyncId = 2284823736
 export function get() {
@@ -9,13 +9,14 @@ export function get() {
 	};
 }
 
-export async function post({request}){
+export async function post({request}) {
 	const data = await request.json() as Event;
 	const {event_data, event_name, initiator, user_id, version} = data;
 	const api = new TodoistApi(import.meta.env.VITE_API_TOKEN)
 	const headers = {
 		'x-api-user': import.meta.env.VITE_HABITICA_API_USER,
-		'x-api-key': import.meta.env.VITE_HABITICA_API_KEY
+		'x-api-key': import.meta.env.VITE_HABITICA_API_KEY,
+		 "Content-Type": "application/json"
 	};
 	const priorityTodoistToHabitica: {[key: number]: string} = {
 		1: '0.1',
@@ -33,9 +34,10 @@ export async function post({request}){
 			headers,
 			body: JSON.stringify({
 				text: event_data.content,
-				type: 'daily',
+				notes: event_data.description,
+				type: "daily",
 				priority: habiticaPriority,
-				alias: event_data.id
+				alias: event_data.id,
 			})
 		})
 		const habiticaResponse = await response.json();
