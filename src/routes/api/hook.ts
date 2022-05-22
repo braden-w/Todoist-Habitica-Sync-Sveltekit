@@ -1,3 +1,4 @@
+import {TodoistApi} from '@doist/todoist-api-typescript';
 import type { Event } from './Event';
 
 export function get() {
@@ -10,6 +11,7 @@ export function get() {
 export async function post({ request }) {
 	const data = await request.json() as Event;
 	const { event_data, event_name, initiator, user_id, version } = data;
+	const api = new TodoistApi(import.meta.env.VITE_API_TOKEN)
 	const headers = {
 		'x-api-user': import.meta.env.VITE_API_USER,
 		'x-api-key': import.meta.env.VITE_API_KEY
