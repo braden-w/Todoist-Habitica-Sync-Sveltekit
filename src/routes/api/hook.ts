@@ -34,43 +34,24 @@ export async function post({ request }) {
 				text: event_data.content,
 				type: 'daily',
 				priority: habiticaPriority,
+				alias: event_data.id
 			})
 		})
 	}
-	const method = 'post';
-	let apiURL = '';
-	const payload = {};
-	switch (event_name) {
-		case 'item:completed':
-			// Add task first
-			const alias = String(Math.floor(Math.random() * 1000000));
-			// const alias = event_data.id
-			console.log(
-				await axios({
-					method: method,
-					url: 'https://habitica.com/api/v3/tasks/user',
-					data: {
-						text: event_data.content,
-						type: 'todo',
-						// TODO: Change event data from random
-						alias: alias,
-						notes: '',
-						priority: event_data.priority
-					},
-					headers: headers
-				})
-			);
-			// Then complete task
-			apiURL = `https://habitica.com/api/v3/tasks/${alias}/score/up`;
-			break;
-		// case "item:uncompleted":
-		//   apiURL = `https://habitica.com/api/v3/tasks/${event_data.id}/score/down`
-		//   break
-		// case "item:deleted":
-		//   method = "delete"
-		//   apiURL = `https://habitica.com/api/v3/tasks/${event_data.id}`
-		//   break
+	if (event_name === "item:completed" && event_data.project_id === 2284823736) {
+		// Mark a daily as completed in Habitica
+		const url = `https://habitica.com/api/v3/tasks/${event_data.id}/score/up`;
+		const response = await fetch(url, {
+			method: 'POST',
+			headers,
+		})
 	}
+	if (event_name === "item:uncompleted" && event_data.project_id === 2284823736) {
+		//   apiURL = `https://habitica.com/api/v3/tasks/${event_data.id}/score/down`
+	}
+	if (event_name === "item:deleted" && event_data.project_id === 2284823736) {
+		//   apiURL = `https://habitica.com/api/v3/tasks/${event_data.id}`
+			}
 	try {
 		console.log(
 			await axios({
