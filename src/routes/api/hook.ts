@@ -9,7 +9,7 @@ export function get() {
 	};
 }
 
-export async function post({request}) {
+export async function post({request}){
 	const data = await request.json() as Event;
 	const {event_data, event_name, initiator, user_id, version} = data;
 	const api = new TodoistApi(import.meta.env.VITE_API_TOKEN)
@@ -38,6 +38,8 @@ export async function post({request}) {
 				alias: event_data.id
 			})
 		})
+		const habiticaResponse = await response.json();
+		console.log(habiticaResponse)
 	}
 	if (event_name === "item:completed" && event_data.project_id === todoistProjectToSyncId) {
 		// Mark a daily as completed in Habitica
@@ -46,6 +48,8 @@ export async function post({request}) {
 			method: 'POST',
 			headers,
 		})
+		const habiticaResponse = await response.json();
+		console.log(habiticaResponse)
 	}
 	if (event_name === "item:uncompleted" && event_data.project_id === todoistProjectToSyncId) {
 		const url = `https://habitica.com/api/v3/tasks/${event_data.id}/score/down`;
@@ -53,6 +57,8 @@ export async function post({request}) {
 			method: 'POST',
 			headers,
 		})
+		const habiticaResponse = await response.json();
+		console.log(habiticaResponse)
 	}
 	if (event_name === "item:deleted" && event_data.project_id === todoistProjectToSyncId) {
 		//   apiURL = `https://habitica.com/api/v3/tasks/${event_data.id}`
