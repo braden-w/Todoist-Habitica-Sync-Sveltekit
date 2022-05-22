@@ -13,8 +13,8 @@ export async function post({ request }) {
 	const { event_data, event_name, initiator, user_id, version } = data;
 	const api = new TodoistApi(import.meta.env.VITE_API_TOKEN)
 	const headers = {
-		'x-api-user': import.meta.env.VITE_API_USER,
-		'x-api-key': import.meta.env.VITE_API_KEY
+		'x-api-user': import.meta.env.VITE_HABITICA_API_USER,
+		'x-api-key': import.meta.env.VITE_HABITICA_API_KEY
 	};
 
 	const method = 'post';
