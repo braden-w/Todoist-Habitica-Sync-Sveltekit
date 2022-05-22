@@ -48,7 +48,11 @@ export async function post({request}) {
 		})
 	}
 	if (event_name === "item:uncompleted" && event_data.project_id === todoistProjectToSyncId) {
-		//   apiURL = `https://habitica.com/api/v3/tasks/${event_data.id}/score/down`
+		const url = `https://habitica.com/api/v3/tasks/${event_data.id}/score/down`;
+		const response = await fetch(url, {
+			method: 'POST',
+			headers,
+		})
 	}
 	if (event_name === "item:deleted" && event_data.project_id === todoistProjectToSyncId) {
 		//   apiURL = `https://habitica.com/api/v3/tasks/${event_data.id}`
