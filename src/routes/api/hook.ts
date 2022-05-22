@@ -16,7 +16,27 @@ export async function post({ request }) {
 		'x-api-user': import.meta.env.VITE_HABITICA_API_USER,
 		'x-api-key': import.meta.env.VITE_HABITICA_API_KEY
 	};
+	const priorityTodoistToHabitica: {[key: number]: string} = {
+		1: '0.1',
+		2: '1',
+		3: '1.5',
+		4: "2"
+	}
 
+	if (event_name === "item:added" && event_data.project_id === 2284823736) {
+		// Add a new daily in Habitica
+		const url = `https://habitica.com/api/v3/tasks/user`;
+		const habiticaPriority = priorityTodoistToHabitica[event_data.priority];
+		const response = await fetch(url, {
+			method: 'POST',
+			headers,
+			body: JSON.stringify({
+				text: event_data.content,
+				type: 'daily',
+				priority: habiticaPriority,
+			})
+		})
+	}
 	const method = 'post';
 	let apiURL = '';
 	const payload = {};
