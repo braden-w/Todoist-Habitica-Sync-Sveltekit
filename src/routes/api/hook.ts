@@ -63,6 +63,13 @@ export async function post({request}) {
 		console.log(habiticaResponse)
 	}
 	if (event_name === "item:deleted" && event_data.project_id === todoistProjectToSyncId) {
-		//   apiURL = `https://habitica.com/api/v3/tasks/${event_data.id}`
+		// Delete a daily in Habitica
+		const url = `https://habitica.com/api/v3/tasks/${event_data.id}`
+		const response = await fetch(url, {
+			method: 'DELETE',
+			headers,
+		})
+		const habiticaResponse = await response.json();
+		console.log(habiticaResponse)
 	}
 }
