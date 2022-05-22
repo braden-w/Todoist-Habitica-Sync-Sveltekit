@@ -1,6 +1,7 @@
 import {TodoistApi} from '@doist/todoist-api-typescript';
 import type { Event } from './Event';
 
+const todoistProjectToSyncId = 2284823736
 export function get() {
 	return {
 		status: 200,
@@ -8,9 +9,9 @@ export function get() {
 	};
 }
 
-export async function post({ request }) {
+export async function post({request}) {
 	const data = await request.json() as Event;
-	const { event_data, event_name, initiator, user_id, version } = data;
+	const {event_data, event_name, initiator, user_id, version} = data;
 	const api = new TodoistApi(import.meta.env.VITE_API_TOKEN)
 	const headers = {
 		'x-api-user': import.meta.env.VITE_HABITICA_API_USER,
@@ -23,7 +24,7 @@ export async function post({ request }) {
 		4: "2"
 	}
 
-	if (event_name === "item:added" && event_data.project_id === 2284823736) {
+	if (event_name === "item:added" && event_data.project_id === todoistProjectToSyncId) {
 		// Add a new daily in Habitica
 		const url = `https://habitica.com/api/v3/tasks/user`;
 		const habiticaPriority = priorityTodoistToHabitica[event_data.priority];
@@ -38,7 +39,7 @@ export async function post({ request }) {
 			})
 		})
 	}
-	if (event_name === "item:completed" && event_data.project_id === 2284823736) {
+	if (event_name === "item:completed" && event_data.project_id === todoistProjectToSyncId) {
 		// Mark a daily as completed in Habitica
 		const url = `https://habitica.com/api/v3/tasks/${event_data.id}/score/up`;
 		const response = await fetch(url, {
@@ -46,23 +47,10 @@ export async function post({ request }) {
 			headers,
 		})
 	}
-	if (event_name === "item:uncompleted" && event_data.project_id === 2284823736) {
+	if (event_name === "item:uncompleted" && event_data.project_id === todoistProjectToSyncId) {
 		//   apiURL = `https://habitica.com/api/v3/tasks/${event_data.id}/score/down`
 	}
-	if (event_name === "item:deleted" && event_data.project_id === 2284823736) {
+	if (event_name === "item:deleted" && event_data.project_id === todoistProjectToSyncId) {
 		//   apiURL = `https://habitica.com/api/v3/tasks/${event_data.id}`
-			}
-	try {
-		console.log(
-			await axios({
-				method: method,
-				url: apiURL,
-				data: payload,
-				headers: headers
-			})
-		);
-	} catch (err) {
-		console.log(err);
 	}
-	res.status(200).end(); // Responding is important
 }
