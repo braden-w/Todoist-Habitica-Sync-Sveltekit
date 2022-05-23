@@ -39,7 +39,19 @@ export async function post({request}) {
 				priority: habiticaPriority,
 				alias: event_data.id,
 			})
-		})
+	// If the event is edited, update the task in habitica
+	if (event_name === 'item:edited' && event_data.project_id === todoistProjectToSyncId) {
+		const url = `https://habitica.com/api/v3/tasks/${event_data.id}`;
+		const habiticaPriority = priorityTodoistToHabitica[event_data.priority];
+		const response = await fetch(url, {
+			method: 'POST',
+			headers,
+			body: JSON.stringify({
+				text: event_data.content,
+				notes: event_data.description,
+				priority: habiticaPriority
+			})
+		});
 		const habiticaResponse = await response.json();
 		console.log(habiticaResponse)
 	}
