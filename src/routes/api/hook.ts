@@ -1,7 +1,7 @@
-import {TodoistApi} from '@doist/todoist-api-typescript';
-import type {Event} from './Event';
+import { TodoistApi } from '@doist/todoist-api-typescript';
+import type { Event } from './Event';
 
-const todoistProjectToSyncId = 2284823736
+const todoistProjectToSyncId = 2284823736;
 export function get() {
 	return {
 		status: 200,
@@ -9,23 +9,23 @@ export function get() {
 	};
 }
 
-export async function post({request}) {
-	const data = await request.json() as Event;
-	const {event_data, event_name, initiator, user_id, version} = data;
-	const api = new TodoistApi(import.meta.env.VITE_API_TOKEN)
+export async function post({ request }) {
+	const data = (await request.json()) as Event;
+	const { event_data, event_name, initiator, user_id, version } = data;
+	const api = new TodoistApi(import.meta.env.VITE_API_TOKEN);
 	const headers = {
 		'x-api-user': import.meta.env.VITE_HABITICA_API_USER,
 		'x-api-key': import.meta.env.VITE_HABITICA_API_KEY,
-		 "Content-Type": "application/json"
+		'Content-Type': 'application/json'
 	};
-	const priorityTodoistToHabitica: {[key: number]: string} = {
+	const priorityTodoistToHabitica: { [key: number]: string } = {
 		1: '0.1',
 		2: '1',
 		3: '1.5',
-		4: "2"
-	}
+		4: '2'
+	};
 
-	if (event_name === "item:added" && event_data.project_id === todoistProjectToSyncId) {
+	if (event_name === 'item:added' && event_data.project_id === todoistProjectToSyncId) {
 		// Add a new daily in Habitica
 		const url = `https://habitica.com/api/v3/tasks/user`;
 		const habiticaPriority = priorityTodoistToHabitica[event_data.priority];
@@ -35,10 +35,14 @@ export async function post({request}) {
 			body: JSON.stringify({
 				text: event_data.content,
 				notes: event_data.description,
-				type: "daily",
+				type: 'daily',
 				priority: habiticaPriority,
-				alias: event_data.id,
+				alias: event_data.id
 			})
+		});
+		const habiticaResponse = await response.json();
+		console.log(habiticaResponse);
+	}
 	// If the event is edited, update the task in habitica
 	if (event_name === 'item:edited' && event_data.project_id === todoistProjectToSyncId) {
 		const url = `https://habitica.com/api/v3/tasks/${event_data.id}`;
@@ -53,35 +57,35 @@ export async function post({request}) {
 			})
 		});
 		const habiticaResponse = await response.json();
-		console.log(habiticaResponse)
+		console.log(habiticaResponse);
 	}
-	if (event_name === "item:completed" && event_data.project_id === todoistProjectToSyncId) {
+	if (event_name === 'item:completed' && event_data.project_id === todoistProjectToSyncId) {
 		// Mark a daily as completed in Habitica
 		const url = `https://habitica.com/api/v3/tasks/${event_data.id}/score/up`;
 		const response = await fetch(url, {
 			method: 'POST',
-			headers,
-		})
+			headers
+		});
 		const habiticaResponse = await response.json();
-		console.log(habiticaResponse)
+		console.log(habiticaResponse);
 	}
-	if (event_name === "item:uncompleted" && event_data.project_id === todoistProjectToSyncId) {
+	if (event_name === 'item:uncompleted' && event_data.project_id === todoistProjectToSyncId) {
 		const url = `https://habitica.com/api/v3/tasks/${event_data.id}/score/down`;
 		const response = await fetch(url, {
 			method: 'POST',
-			headers,
-		})
+			headers
+		});
 		const habiticaResponse = await response.json();
-		console.log(habiticaResponse)
+		console.log(habiticaResponse);
 	}
-	if (event_name === "item:deleted" && event_data.project_id === todoistProjectToSyncId) {
+	if (event_name === 'item:deleted' && event_data.project_id === todoistProjectToSyncId) {
 		// Delete a daily in Habitica
-		const url = `https://habitica.com/api/v3/tasks/${event_data.id}`
+		const url = `https://habitica.com/api/v3/tasks/${event_data.id}`;
 		const response = await fetch(url, {
 			method: 'DELETE',
-			headers,
-		})
+			headers
+		});
 		const habiticaResponse = await response.json();
-		console.log(habiticaResponse)
+		console.log(habiticaResponse);
 	}
 }
