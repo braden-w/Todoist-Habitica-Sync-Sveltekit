@@ -15,8 +15,9 @@ export async function post({ request }: { request: Request }) {
 	const { event_data, event_name, initiator, user_id, version } = data;
 	const api = new TodoistApi(import.meta.env.VITE_API_TOKEN);
 
-	if (event_name === 'item:added' && event_data.project_id === todoistProjectToSyncId) {
-		await addDailyToHabitica(event_data);
+	if (event_name === 'item:added' ) {
+		if (event_data.project_id === todoistProjectToSyncId) await addDailyToHabitica(event_data);
+		else await addTaskToHabitica(event_data);
 	}
 	if (event_name === 'item:updated') {
 		await editHabiticaTask(event_data);
@@ -83,6 +84,26 @@ async function addDailyToHabitica(event_data: EventData) {
 			text: event_data.content,
 			notes: event_data.description,
 			type: 'daily',
+			priority: habiticaPriority,
+			alias: event_data.id
+		})
+	});
+	const habiticaResponse = await response.json();
+	if (habiticaResponse.error) {
+		console.error(habiticaResponse.error);
+	}
+}
+
+async function addTaskToHabitica(event_data: EventData) {
+	const url = `https://habitica.com/api/v3/tasks/user`;
+	const habiticaPriority = priorityTodoistToHabitica[event_data.priority];
+	const response = await fetch(url, {
+		method: 'POST',
+		headers,
+		body: JSON.stringify({
+			text: event_data.content,
+			notes: event_data.description,
+			type: 'todo',
 			priority: habiticaPriority,
 			alias: event_data.id
 		})
