@@ -9,7 +9,7 @@ export function get() {
 	};
 }
 
-export async function post({ request }) {
+export async function post({ request }: {request: Request}) {
 	const data = (await request.json()) as Event;
 	const { event_data, event_name, initiator, user_id, version } = data;
 	const api = new TodoistApi(import.meta.env.VITE_API_TOKEN);
@@ -87,5 +87,9 @@ export async function post({ request }) {
 		});
 		const habiticaResponse = await response.json();
 		console.log(habiticaResponse);
+	}
+	return {
+		status: 200,
+		body: 'Done!',
 	}
 }
