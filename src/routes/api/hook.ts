@@ -1,4 +1,5 @@
 import { TodoistApi } from '@doist/todoist-api-typescript';
+import type {HabiticaResponse} from 'src/routes/api/HabiticaResponse';
 import type { Event } from './Event';
 
 const todoistProjectToSyncId = 2284823736;
@@ -46,7 +47,7 @@ export async function post({ request }: { request: Request }) {
 		}
 	}
 	// If the event is edited, update the task in habitica
-	if (event_name === 'item:edited' && event_data.project_id === todoistProjectToSyncId) {
+	if (event_name === 'item:updated') {
 		const url = `https://habitica.com/api/v3/tasks/${event_data.id}`;
 		const habiticaPriority = priorityTodoistToHabitica[event_data.priority];
 		const response = await fetch(url, {
@@ -58,7 +59,7 @@ export async function post({ request }: { request: Request }) {
 				priority: habiticaPriority
 			})
 		});
-		const habiticaResponse = await response.json();
+		const habiticaResponse = await response.json() as HabiticaResponse;
 		if (habiticaResponse.error) {
 			console.error(habiticaResponse.error);
 		}
