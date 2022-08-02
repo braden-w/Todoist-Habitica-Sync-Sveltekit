@@ -16,22 +16,18 @@ export async function post({ request }: { request: Request }) {
 	const api = new TodoistApi(import.meta.env.VITE_API_TOKEN);
 
 	if (event_name === 'item:added' && event_data.project_id === todoistProjectToSyncId) {
-		// Add a new daily in Habitica
 		await addDailyToHabitica(event_data);
 	}
-	// If the event is edited, update the task in habitica
 	if (event_name === 'item:updated') {
 		await editHabiticaTask(event_data);
 	}
 	if (event_name === 'item:completed') {
-		// Mark a daily as completed in Habitica
 		await markHabiticaTaskCompleted(event_data);
 	}
 	if (event_name === 'item:uncompleted') {
 		await markHabiticaTaskUncompleted(event_data);
 	}
 	if (event_name === 'item:deleted') {
-		// Delete a daily in Habitica
 		await deleteHabiticaTask(event_data);
 	}
 	return {
