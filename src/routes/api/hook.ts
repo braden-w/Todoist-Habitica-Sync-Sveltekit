@@ -9,7 +9,7 @@ export function get() {
 	};
 }
 
-export async function post({ request }: {request: Request}) {
+export async function post({ request }: { request: Request }) {
 	const data = (await request.json()) as Event;
 	const { event_data, event_name, initiator, user_id, version } = data;
 	const api = new TodoistApi(import.meta.env.VITE_API_TOKEN);
@@ -41,7 +41,9 @@ export async function post({ request }: {request: Request}) {
 			})
 		});
 		const habiticaResponse = await response.json();
-		console.log(habiticaResponse);
+		if (habiticaResponse.error) {
+			console.error(habiticaResponse.error);
+		}
 	}
 	// If the event is edited, update the task in habitica
 	if (event_name === 'item:edited' && event_data.project_id === todoistProjectToSyncId) {
@@ -57,7 +59,9 @@ export async function post({ request }: {request: Request}) {
 			})
 		});
 		const habiticaResponse = await response.json();
-		console.log(habiticaResponse);
+		if (habiticaResponse.error) {
+			console.error(habiticaResponse.error);
+		}
 	}
 	if (event_name === 'item:completed' && event_data.project_id === todoistProjectToSyncId) {
 		// Mark a daily as completed in Habitica
@@ -67,7 +71,9 @@ export async function post({ request }: {request: Request}) {
 			headers
 		});
 		const habiticaResponse = await response.json();
-		console.log(habiticaResponse);
+		if (habiticaResponse.error) {
+			console.error(habiticaResponse.error);
+		}
 	}
 	if (event_name === 'item:uncompleted' && event_data.project_id === todoistProjectToSyncId) {
 		const url = `https://habitica.com/api/v3/tasks/${event_data.id}/score/down`;
@@ -76,7 +82,9 @@ export async function post({ request }: {request: Request}) {
 			headers
 		});
 		const habiticaResponse = await response.json();
-		console.log(habiticaResponse);
+		if (habiticaResponse.error) {
+			console.error(habiticaResponse.error);
+		}
 	}
 	if (event_name === 'item:deleted' && event_data.project_id === todoistProjectToSyncId) {
 		// Delete a daily in Habitica
@@ -86,10 +94,12 @@ export async function post({ request }: {request: Request}) {
 			headers
 		});
 		const habiticaResponse = await response.json();
-		console.log(habiticaResponse);
+		if (habiticaResponse.error) {
+			console.error(habiticaResponse.error);
+		}
 	}
 	return {
 		status: 200,
-		body: 'Done!',
-	}
+		body: 'Done!'
+	};
 }
