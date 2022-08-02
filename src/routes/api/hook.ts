@@ -14,68 +14,6 @@ export async function post({ request }: { request: Request }) {
 	const data = (await request.json()) as Event;
 	const { event_data, event_name, initiator, user_id, version } = data;
 	const api = new TodoistApi(import.meta.env.VITE_API_TOKEN);
-	const headers = {
-		'x-api-user': import.meta.env.VITE_HABITICA_API_USER,
-		'x-api-key': import.meta.env.VITE_HABITICA_API_KEY,
-		'Content-Type': 'application/json'
-	};
-	const priorityTodoistToHabitica: { [key: number]: string } = {
-		1: '0.1',
-		2: '1',
-		3: '1.5',
-		4: '2'
-	};
-
-	async function addDailyToHabitica(event_data: EventData) {
-		const url = `https://habitica.com/api/v3/tasks/user`;
-		const habiticaPriority = priorityTodoistToHabitica[event_data.priority];
-		const response = await fetch(url, {
-			method: 'POST',
-			headers,
-			body: JSON.stringify({
-				text: event_data.content,
-				notes: event_data.description,
-				type: 'daily',
-				priority: habiticaPriority,
-				alias: event_data.id
-			})
-		});
-		const habiticaResponse = await response.json();
-		if (habiticaResponse.error) {
-			console.error(habiticaResponse.error);
-		}
-	}
-
-
-	async function editHabiticaTask(event_data: EventData) {
-		const url = `https://habitica.com/api/v3/tasks/${event_data.id}`;
-		const habiticaPriority = priorityTodoistToHabitica[event_data.priority];
-		const response = await fetch(url, {
-			method: 'POST',
-			headers,
-			body: JSON.stringify({
-				text: event_data.content,
-				notes: event_data.description,
-				priority: habiticaPriority
-			})
-		});
-		const habiticaResponse = (await response.json()) as HabiticaResponse;
-		if (habiticaResponse.error) {
-			console.error(habiticaResponse.error);
-		}
-	}
-
-	async function markHabiticaTaskCompleted(event_data: EventData) {
-		const url = `https://habitica.com/api/v3/tasks/${event_data.id}/score/up`;
-		const response = await fetch(url, {
-			method: 'POST',
-			headers
-		});
-		const habiticaResponse = await response.json();
-		if (habiticaResponse.error) {
-			console.error(habiticaResponse.error);
-		}
-	}
 
 	if (event_name === 'item:added' && event_data.project_id === todoistProjectToSyncId) {
 		// Add a new daily in Habitica
@@ -90,15 +28,7 @@ export async function post({ request }: { request: Request }) {
 		await markHabiticaTaskCompleted(event_data);
 	}
 	if (event_name === 'item:uncompleted' && event_data.project_id === todoistProjectToSyncId) {
-		const url = `https://habitica.com/api/v3/tasks/${event_data.id}/score/down`;
-		const response = await fetch(url, {
-			method: 'POST',
-			headers
-		});
-		const habiticaResponse = await response.json();
-		if (habiticaResponse.error) {
-			console.error(habiticaResponse.error);
-		}
+		await markHabiticaTaskUncompleted(event_data);
 	}
 	if (event_name === 'item:deleted' && event_data.project_id === todoistProjectToSyncId) {
 		// Delete a daily in Habitica
@@ -116,5 +46,79 @@ export async function post({ request }: { request: Request }) {
 		status: 200,
 		body: 'Done!'
 	};
+}
 
+// Begin Helper Functions
+const headers = {
+	'x-api-user': import.meta.env.VITE_HABITICA_API_USER,
+	'x-api-key': import.meta.env.VITE_HABITICA_API_KEY,
+	'Content-Type': 'application/json'
+};
+const priorityTodoistToHabitica: { [key: number]: string } = {
+	1: '0.1',
+	2: '1',
+	3: '1.5',
+	4: '2'
+};
+
+async function markHabiticaTaskUncompleted(event_data: EventData) {
+	const url = `https://habitica.com/api/v3/tasks/${event_data.id}/score/down`;
+	const response = await fetch(url, {
+		method: 'POST',
+		headers
+	});
+	const habiticaResponse = await response.json();
+	if (habiticaResponse.error) {
+		console.error(habiticaResponse.error);
+	}
+}
+
+async function addDailyToHabitica(event_data: EventData) {
+	const url = `https://habitica.com/api/v3/tasks/user`;
+	const habiticaPriority = priorityTodoistToHabitica[event_data.priority];
+	const response = await fetch(url, {
+		method: 'POST',
+		headers,
+		body: JSON.stringify({
+			text: event_data.content,
+			notes: event_data.description,
+			type: 'daily',
+			priority: habiticaPriority,
+			alias: event_data.id
+		})
+	});
+	const habiticaResponse = await response.json();
+	if (habiticaResponse.error) {
+		console.error(habiticaResponse.error);
+	}
+}
+
+async function editHabiticaTask(event_data: EventData) {
+	const url = `https://habitica.com/api/v3/tasks/${event_data.id}`;
+	const habiticaPriority = priorityTodoistToHabitica[event_data.priority];
+	const response = await fetch(url, {
+		method: 'POST',
+		headers,
+		body: JSON.stringify({
+			text: event_data.content,
+			notes: event_data.description,
+			priority: habiticaPriority
+		})
+	});
+	const habiticaResponse = (await response.json()) as HabiticaResponse;
+	if (habiticaResponse.error) {
+		console.error(habiticaResponse.error);
+	}
+}
+
+async function markHabiticaTaskCompleted(event_data: EventData) {
+	const url = `https://habitica.com/api/v3/tasks/${event_data.id}/score/up`;
+	const response = await fetch(url, {
+		method: 'POST',
+		headers
+	});
+	const habiticaResponse = await response.json();
+	if (habiticaResponse.error) {
+		console.error(habiticaResponse.error);
+	}
 }
