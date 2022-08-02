@@ -23,24 +23,16 @@ export async function post({ request }: { request: Request }) {
 	if (event_name === 'item:updated') {
 		await editHabiticaTask(event_data);
 	}
-	if (event_name === 'item:completed' && event_data.project_id === todoistProjectToSyncId) {
+	if (event_name === 'item:completed') {
 		// Mark a daily as completed in Habitica
 		await markHabiticaTaskCompleted(event_data);
 	}
-	if (event_name === 'item:uncompleted' && event_data.project_id === todoistProjectToSyncId) {
+	if (event_name === 'item:uncompleted') {
 		await markHabiticaTaskUncompleted(event_data);
 	}
-	if (event_name === 'item:deleted' && event_data.project_id === todoistProjectToSyncId) {
+	if (event_name === 'item:deleted') {
 		// Delete a daily in Habitica
-		const url = `https://habitica.com/api/v3/tasks/${event_data.id}`;
-		const response = await fetch(url, {
-			method: 'DELETE',
-			headers
-		});
-		const habiticaResponse = await response.json();
-		if (habiticaResponse.error) {
-			console.error(habiticaResponse.error);
-		}
+		await deleteHabiticaTask(event_data);
 	}
 	return {
 		status: 200,
@@ -60,6 +52,18 @@ const priorityTodoistToHabitica: { [key: number]: string } = {
 	3: '1.5',
 	4: '2'
 };
+
+async function deleteHabiticaTask(event_data: EventData) {
+	const url = `https://habitica.com/api/v3/tasks/${event_data.id}`;
+	const response = await fetch(url, {
+		method: 'DELETE',
+		headers
+	});
+	const habiticaResponse = await response.json();
+	if (habiticaResponse.error) {
+		console.error(habiticaResponse.error);
+	}
+}
 
 async function markHabiticaTaskUncompleted(event_data: EventData) {
 	const url = `https://habitica.com/api/v3/tasks/${event_data.id}/score/down`;
